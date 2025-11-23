@@ -1,8 +1,6 @@
 '''
 Evaluate zeroshot classification performance of MM-ECG foundation model.
 '''
-import ipdb
-import json
 import os
 import warnings
 import yaml

@@ -4,11 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "melp"
-authors = [
-    {name = "Fuying Wang", email = "fuyingw@connect.hku.hk"},
-    {name = "Jiacheng Xu"},
-]
-description = "From Token to Rhythm: A Multi-Scale Approach for ECG-Language Pretraining"
+
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10"
