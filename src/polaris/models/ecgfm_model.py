@@ -1,6 +1,5 @@
 import torch
 import math
-import ipdb
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,9 +8,9 @@ from collections import OrderedDict
 from einops import rearrange
 from timm.models.layers import Mlp
 from fairseq_signals_backbone.models.wav2vec2.wav2vec2_cmsc import Wav2Vec2CMSCModel, Wav2Vec2CMSCConfig
-from melp.utils.openclip_loss import ClipLoss
-from melp.models.base_pretrain_model import BasePretrainModel
-from melp.backbone.transformer import AttentionalPooler
+from polaris.utils.openclip_loss import ClipLoss
+from polaris.models.base_pretrain_model import BasePretrainModel
+from polaris.backbone.transformer import AttentionalPooler
 
 
 def off_diagonal(x):
@@ -327,8 +326,8 @@ class ECGFMModel(BasePretrainModel):
 
 
 if __name__ == "__main__":
-    from melp.datasets.pretrain_datamodule import ECGTextDataModule
-    from melp.paths import RAW_DATA_PATH
+    from polaris.datasets.pretrain_datamodule import ECGTextDataModule
+    from polaris.paths import RAW_DATA_PATH
     dm = ECGTextDataModule(
         dataset_dir=str(RAW_DATA_PATH),
         dataset_list=["mimic-iv-ecg"],
@@ -348,4 +347,3 @@ if __name__ == "__main__":
     loss_dict, _ = model.shared_step(batch, 0)
     # print(ecg_emb.shape)
     print(loss_dict)
-    ipdb.set_trace()

@@ -1,4 +1,3 @@
-import ipdb
 from pprint import pprint
 import os
 from argparse import ArgumentParser, Namespace
@@ -11,13 +10,13 @@ import warnings
 from lightning import seed_everything, Trainer
 from lightning.pytorch.tuner import Tuner
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, EarlyStopping
-from lightning.pytorch.loggers import WandbLogger
-from melp.datasets.pretrain_datamodule import ECGTextDataModule
-from melp.models.merl_model import MERLModel
-from melp.models.ecgfm_model import ECGFMModel
-from melp.models.melp_model import MELPModel
-from melp.paths import ROOT_PATH as REPO_ROOT_DIR
-from melp.paths import RAW_DATA_PATH
+from swanlab.integration.pytorch_lightning import SwanLabLogger
+from polaris.datasets.pretrain_datamodule import ECGTextDataModule
+from polaris.models.merl_model import MERLModel
+from polaris.models.ecgfm_model import ECGFMModel
+from polaris.models.melp_model import MELPModel
+from polaris.paths import ROOT_PATH as REPO_ROOT_DIR
+from polaris.paths import DATA_ROOT_PATH
 
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -26,24 +25,19 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = True
 torch.set_float32_matmul_precision('high')
 
-'''
-CUDA_VISIBLE_DEVICES=0,1,2,3 python main_pretrain.py --num_devices 4 --train_data_pct 1 \
-    --text_encoder_name fuyingw/heart_bert \
-    --lr 2e-4 --model_name melp --batch_size 64 --max_epochs 100 \
-    --ecg_encoder_name ecgfm \
-    --clip_loss_weight 1.0 --caption_loss_weight 2.0 --local_loss_weight 0.2
-'''
+
 
 def main(hparams: Namespace):
 
     # ------------------------
     # 1 INIT TRAINER
     # ------------------------
-    now = datetime.datetime.now(tz.tzlocal())
+    cn_tz = tz.gettz('Asia/Shanghai')
+    now = datetime.datetime.now(cn_tz)
     extension = now.strftime("%Y_%m_%d_%H_%M_%S")
-    extension = f"melp_{hparams.model_name}_{extension}"
+    extension = f"polaris_{hparams.model_name}_{extension}"
     ckpt_dir = os.path.join(
-        REPO_ROOT_DIR, f"logs/melp/ckpts/{extension}")
+        REPO_ROOT_DIR, f"logs/polaris/ckpts/{extension}")
     os.makedirs(ckpt_dir, exist_ok=True)
     if hparams.model_name in ["merl", "melp"]:
         callbacks = [
@@ -54,21 +48,27 @@ def main(hparams: Namespace):
             EarlyStopping(monitor="val/mean_AUROC", min_delta=0,
                         patience=5, verbose=True, mode="max"),
         ]
-    elif hparams.model_name in ["leadfusion", "vqnsp", "heartlang", "ecgfm"]:
-        callbacks = [
-            LearningRateMonitor(logging_interval="step"),
-            ModelCheckpoint(monitor="val/loss", dirpath=ckpt_dir,
-                            save_last=False, mode="min", save_top_k=2,
-                            auto_insert_metric_name=True),
-            EarlyStopping(monitor="val/loss", min_delta=0,
-                        patience=5, verbose=True, mode="min"),
-        ]
-    else:
-        raise NotImplementedError
-    logger_dir = os.path.join(REPO_ROOT_DIR, "logs/melp")
+    # elif hparams.model_name in ["leadfusion", "vqnsp", "heartlang", "ecgfm"]:
+    #     callbacks = [
+    #         LearningRateMonitor(logging_interval="step"),
+    #         ModelCheckpoint(monitor="val/loss", dirpath=ckpt_dir,
+    #                         save_last=False, mode="min", save_top_k=2,
+    #                         auto_insert_metric_name=True),
+    #         EarlyStopping(monitor="val/loss", min_delta=0,
+    #                     patience=5, verbose=True, mode="min"),
+    #     ]
+    # else:
+    #     raise NotImplementedError
+    logger_dir = os.path.join(REPO_ROOT_DIR, "logs/polaris")
     os.makedirs(logger_dir, exist_ok=True)
-    wandb_logger = WandbLogger(
-        project="melp", save_dir=logger_dir, name=extension)
+    
+    # 使用 SwanLab 记录实验
+    logger = SwanLabLogger(
+        project="polaris",
+        experiment_name=extension,
+        save_dir=logger_dir
+    )
+    
     trainer = Trainer(
         max_epochs=hparams.max_epochs,
         accelerator="gpu",
@@ -77,7 +77,7 @@ def main(hparams: Namespace):
         strategy="ddp_find_unused_parameters_true",
         precision=32 if hparams.model_name == "ecgfm" else "bf16-mixed",
         callbacks=callbacks,
-        logger=wandb_logger
+        logger=logger
     )
 
     # ------------------------
@@ -88,7 +88,7 @@ def main(hparams: Namespace):
     
     if hparams.model_name == "merl":
         datamodule = ECGTextDataModule(
-            dataset_dir=str(RAW_DATA_PATH),
+            dataset_dir=str(DATA_ROOT_PATH),
             dataset_list=["mimic-iv-ecg"],
             val_dataset_list=hparams.val_dataset_list,
             batch_size=hparams.batch_size,  
@@ -98,7 +98,7 @@ def main(hparams: Namespace):
         model = MERLModel(**vars(hparams))
     elif hparams.model_name == "melp":
         datamodule = ECGTextDataModule(
-            dataset_dir=str(RAW_DATA_PATH),
+            dataset_dir=str(DATA_ROOT_PATH),
             dataset_list=["mimic-iv-ecg"],
             val_dataset_list=hparams.val_dataset_list,
             batch_size=hparams.batch_size,  
@@ -106,10 +106,10 @@ def main(hparams: Namespace):
             train_data_pct=hparams.train_data_pct,
             use_rlm=True
         )
-        model = MELPModel(**vars(hparams))
+        model = MELPModel(**vars(hparams))  
     elif hparams.model_name == "ecgfm":
         datamodule = ECGTextDataModule(
-            dataset_dir=str(RAW_DATA_PATH),
+            dataset_dir=str(DATA_ROOT_PATH),
             dataset_list=["mimic-iv-ecg"],
             val_dataset_list=None,
             batch_size=hparams.batch_size,  
@@ -141,8 +141,15 @@ def main(hparams: Namespace):
 
 
 if __name__ == '__main__':
+    '''
+CUDA_VISIBLE_DEVICES=0,1,2,3 python main_pretrain.py --num_devices 4 --train_data_pct 1 \
+    --text_encoder_name fuyingw/heart_bert \
+    --lr 2e-4 --model_name melp --batch_size 64 --max_epochs 100 \
+    --ecg_encoder_name ecgfm \
+    --clip_loss_weight 1.0 --caption_loss_weight 2.0 --local_loss_weight 0.2
+'''
     parser = ArgumentParser(description="Pretraining Multimodal ECG Foundation Model.")
-    parser.add_argument("--model_name", type=str, default="merl",
+    parser.add_argument("--model_name", type=str, default="melp",
                         choices=["merl", "ecgfm", "melp"])
     parser.add_argument("--model_size", type=str, default="base")
     parser.add_argument("--seed", type=int, default=42)
@@ -152,16 +159,16 @@ if __name__ == '__main__':
     parser.add_argument("--num_devices", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--accumulate_grad_batches", type=int, default=1)
-    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--ecg_encoder_name", type=str, default="ecgfm")
     parser.add_argument("--ecg_encoder_weight", type=str, default="")
-    parser.add_argument("--text_encoder_name", type=str, default="google/flan-t5-small")
+    parser.add_argument("--text_encoder_name", type=str, default="ncbi/MedCPT-Query-Encoder")
     parser.add_argument("--clip_loss_weight", type=float, default=1.)
-    parser.add_argument("--caption_loss_weight", type=float, default=1.)
-    parser.add_argument("--local_loss_weight", type=float, default=1.)
+    parser.add_argument("--caption_loss_weight", type=float, default=2.0)
+    parser.add_argument("--local_loss_weight", type=float, default=0.2)
     parser.add_argument("--n_queries_contrast", type=int, default=12)
     parser.add_argument("--val_dataset_list", type=str, nargs="+", 
-                        default=["ptbxl_super_class", "ptbxl_sub_class", "ptbxl_form", "ptbxl_rhythm", 
+                        default=["ptbxl-super", "ptbxl-sub", "ptbxl-form", "ptbxl-rhythm", 
                                   "icbeb", "chapman"])
 
     hparams = parser.parse_args()

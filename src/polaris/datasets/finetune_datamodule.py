@@ -1,10 +1,9 @@
-import ipdb
 import os
 import pandas as pd
 from torch.utils.data import DataLoader
 from lightning import LightningDataModule
-from melp.datasets.finetune_dataset import ECGDataset
-from melp.paths import SPLIT_DIR, RAW_DATA_PATH, PROCESSED_DATA_PATH
+from polaris.datasets.finetune_dataset import ECGDataset
+from polaris.paths import SPLIT_DIR, RAW_DATA_PATH, PROCESSED_DATA_PATH
 
 
 class ECGDataModule(LightningDataModule):
@@ -105,4 +104,3 @@ if __name__ == "__main__":
     print(batch["ecg"].shape)
     print(batch["ecg_patch"].shape)
     print(batch["t_indices"].shape)
-    ipdb.set_trace()

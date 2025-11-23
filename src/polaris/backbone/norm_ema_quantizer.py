@@ -2,7 +2,6 @@
 # Borrow from https://github.com/935963004/LaBraM/blob/main/norm_ema_quantizer.py
 # ---------------------------------------------------------
 
-import ipdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -202,9 +201,9 @@ class NormEMAVectorQuantizer(nn.Module):
 
 
 if __name__ == "__main__":
-    from melp.datasets.pretrain_dataset import ECG_Text_Dataset
-    from melp.datasets.pretrain_datamodule import ECGTextDataModule
-    from melp.backbone.tokenizer import QRS_Tokenizer
+    from polaris.datasets.pretrain_dataset import ECG_Text_Dataset
+    from polaris.datasets.pretrain_datamodule import ECGTextDataModule
+    from polaris.backbone.tokenizer import QRS_Tokenizer
 
     tokenizer = QRS_Tokenizer(window_size=96, sentence_len=252)
     quantizer = NormEMAVectorQuantizer(n_embed=8196, embedding_dim=96, beta=0.25, decay=0.99, eps=1e-5)
@@ -226,6 +225,4 @@ if __name__ == "__main__":
     x = x.reshape(b, 12, -1, w)
     print(x.shape)
     z_q, loss, encoding_indices = quantizer(x)
-    # import ipdb
-    # ipdb.set_trace()  
     # print(x.shape)

@@ -51,8 +51,7 @@ class ST_ECGFormer(nn.Module):
                     time_embed[i, j, :] = self.time_embed_set[t_indices[i][j]]
                 except:
                     print(i, j)
-                    import ipdb
-                    ipdb.set_trace()
+                    raise
                 sqatial_embed[i, j, :] = self.sqatial_embed_set[sqatial_indices[i][j]]
         x[:,self.num_leads:,:] += time_embed + sqatial_embed
         x = self.dropout(x)

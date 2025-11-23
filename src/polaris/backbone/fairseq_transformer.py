@@ -6,14 +6,14 @@ from omegaconf import II
 import torch
 import torch.nn as nn
 
-from melp.backbone.fairseq_signals.data.data_utils import compute_mask_indices
-from melp.backbone.fairseq_signals.models.pretraining_model import PretrainingConfig, PretrainingModel
-from melp.backbone.fairseq_signals.models.finetuning_model import FinetuningConfig, FinetuningModel
-from melp.backbone.fairseq_signals.modules import (
+from polaris.backbone.fairseq_signals.data.data_utils import compute_mask_indices
+from polaris.backbone.fairseq_signals.models.pretraining_model import PretrainingConfig, PretrainingModel
+from polaris.backbone.fairseq_signals.models.finetuning_model import FinetuningConfig, FinetuningModel
+from polaris.backbone.fairseq_signals.modules import (
     TransformerEncoder
 )
-from melp.backbone.fairseq_signals.tasks import Task
-from melp.backbone.fairseq_signals.dataclass import ChoiceEnum
+from polaris.backbone.fairseq_signals.tasks import Task
+from polaris.backbone.fairseq_signals.dataclass import ChoiceEnum
 
 EXTRACTOR_MODE_CHOICES = ChoiceEnum(["default", "layer_norm"])
 MASKING_DISTRIBUTION_CHOICES = ChoiceEnum(["static", "uniform", "normal", "poisson"])

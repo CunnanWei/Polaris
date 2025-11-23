@@ -1,5 +1,4 @@
 import torch
-import ipdb
 import yaml
 import math
 import numpy as np
@@ -9,13 +8,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer, T5EncoderModel
 from sklearn.metrics import roc_auc_score, precision_recall_curve, accuracy_score, f1_score
-from melp.backbone.resnet1d import ResNet18, ResNet34, ResNet50, ResNet101
-from melp.backbone.vit1d import vit_tiny, vit_small, vit_middle, vit_base
-from melp.backbone.pooling import AttentionPool2d
-from melp.models.base_pretrain_model import BasePretrainModel
-# from melp.utils.utils_loss import clip_loss
-from melp.utils.openclip_loss import ClipLoss
-from melp.paths import PROMPT_PATH, DATASET_LABELS_PATH
+from polaris.backbone.resnet1d import ResNet18, ResNet34, ResNet50, ResNet101
+from polaris.backbone.vit1d import vit_tiny, vit_small, vit_middle, vit_base
+from polaris.backbone.pooling import AttentionPool2d
+from polaris.models.base_pretrain_model import BasePretrainModel
+# from polaris.utils.utils_loss import clip_loss
+from polaris.utils.openclip_loss import ClipLoss
+from polaris.paths import PROMPT_PATH, DATASET_LABELS_PATH
 
 
 class MERLModel(BasePretrainModel):

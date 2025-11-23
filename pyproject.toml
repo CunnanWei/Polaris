@@ -3,20 +3,35 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "melp"
+name = "polaris"
 
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10"
-# TODO: update dependencies later
 dependencies = [
+    "cosine-annealing-warmup",
+    "einops",
+    "fairseq-signals",
+    "fairseq-signals-backbone",
+    "lightning",
+    "neurokit2",
+    "numpy",
+    "omegaconf",
     "pandas",
+    "pyyaml",
+    "scikit-learn",
+    "scipy",
+    "timm",
     "torch",
-    "lightning"
+    "torchmetrics",
+    "torchvision",
+    "tqdm",
+    "transformers",
+    "wfdb"
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]    # list of folders that contain the packages (["."] by default)
-include = ["src"]  # package names should match these glob patterns (["*"] by default)
+include = ["polaris*"]  # package names should match these glob patterns (["*"] by default)
 exclude = []         # exclude packages matching these glob patterns (empty by default)
 namespaces = false   # to disable scanning PEP 420 namespaces (true by default)

@@ -8,26 +8,23 @@ Contributions:
 from typing import List, Optional
 from dataclasses import dataclass
 import numpy as np
-import ot
-import ipdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
-from timm.models import create_model
 from transformers import AutoModel, AutoTokenizer, AutoModelForCausalLM
-from melp.models.merl_model import MERLModel
-from melp.backbone.transformer import  (
+from polaris.models.merl_model import MERLModel
+from polaris.backbone.transformer import  (
     LayerNorm,
     QuickGELU,
     MultimodalTransformer,
 )
-from melp.utils.openclip_loss import CoCaLoss
-from melp.models.ecgfm_model import ECGFMModel
-from melp.backbone.transformer import AttentionalPooler
-from melp.backbone.resnet1d import ResNet18, ResNet34, ResNet50, ResNet101
-from melp.backbone import modeling_finetune
-from melp.paths import ECGFM_PATH
+from polaris.utils.openclip_loss import CoCaLoss
+from polaris.models.ecgfm_model import ECGFMModel
+from polaris.backbone.transformer import AttentionalPooler
+from polaris.backbone.resnet1d import ResNet18, ResNet34, ResNet50, ResNet101
+from polaris.backbone import modeling_finetune
+from polaris.paths import ECGFM_PATH
 try:
     from transformers import (
         BeamSearchScorer,
@@ -256,7 +253,7 @@ class MELPModel(MERLModel):
                  ecg_encoder_name: str = "ecgfm",
                  ecg_encoder_weight: str = "",
                  text_encoder_name: str = "ncbi/MedCPT-Query-Encoder",
-                 val_dataset_list: List = ["ptbxl_super_class", "ptbxl_sub_class", "ptbxl_form", "ptbxl_rhythm",
+                 val_dataset_list: List = ["ptbxl-super", "ptbxl-sub", "ptbxl-form", "ptbxl-rhythm",
                                            "icbeb", "chapman"],
                  max_seq_len: int = 128,
                  n_queries_contrast: int = 13,
@@ -608,7 +605,7 @@ class MELPModel(MERLModel):
         }
 
         if torch.isnan(loss_dict["loss"]):
-            ipdb.set_trace()
+            pass
 
         # don't write metrics for now
         metrics_dict = {}
@@ -934,7 +931,7 @@ def prepare_inputs_for_generation(input_ids, image_inputs, past=None, **kwargs):
 
 
 if __name__ == "__main__":
-    # from melp.datasets.pretrain_datamodule import ECGTextDataModule
+    # from polaris.datasets.pretrain_datamodule import ECGTextDataModule
     # dm = ECGTextDataModule(
     #     dataset_dir="/disk1/*/ECG/raw",
     #     dataset_list=["mimic-iv-ecg"],
@@ -949,4 +946,3 @@ if __name__ == "__main__":
     
     model = MELPModel(ecg_encoder_name="ecgfm")
     # out = model.shared_step(batch, 0)
-    ipdb.set_trace()

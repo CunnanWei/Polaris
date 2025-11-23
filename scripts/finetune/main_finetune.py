@@ -1,4 +1,3 @@
-import ipdb
 from pprint import pprint
 import os
 from argparse import ArgumentParser, Namespace
@@ -11,15 +10,15 @@ import warnings
 from lightning import seed_everything, Trainer
 from lightning.pytorch.tuner import Tuner
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, EarlyStopping
-from lightning.pytorch.loggers import WandbLogger
-from melp.datasets.finetune_datamodule import ECGDataModule
-from melp.models.merl_model import MERLModel
-from melp.models.ecgfm_model import ECGFMModel
-from melp.models.melp_model import MELPModel
-from melp.models.ssl_finetuner import SSLFineTuner
-from melp.paths import ROOT_PATH as REPO_ROOT_DIR
-from melp.paths import RAW_DATA_PATH
-from melp.paths import VQNSP_CKPT_PATH
+from swanlab.integration.pytorch_lightning import SwanLabLogger
+from polaris.datasets.finetune_datamodule import ECGDataModule
+from polaris.models.merl_model import MERLModel
+from polaris.models.ecgfm_model import ECGFMModel
+from polaris.models.melp_model import MELPModel
+from polaris.models.ssl_finetuner import SSLFineTuner
+from polaris.paths import ROOT_PATH as REPO_ROOT_DIR
+from polaris.paths import RAW_DATA_PATH
+from polaris.paths import VQNSP_CKPT_PATH
 
 warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -42,9 +41,9 @@ def main(hparams: Namespace):
     # ------------------------
     now = datetime.datetime.now(tz.tzlocal())
     extension = now.strftime("%Y_%m_%d_%H_%M_%S")
-    extension = f"melp_finetune_{hparams.model_name}_{extension}"
+    extension = f"polaris_finetune_{hparams.model_name}_{extension}"
     ckpt_dir = os.path.join(
-        REPO_ROOT_DIR, f"logs/melp_finetune/ckpts/{extension}")
+        REPO_ROOT_DIR, f"logs/polaris_finetune/ckpts/{extension}")
     os.makedirs(ckpt_dir, exist_ok=True)
     callbacks = [
         LearningRateMonitor(logging_interval="step"),
@@ -54,10 +53,16 @@ def main(hparams: Namespace):
         EarlyStopping(monitor="val_auc", min_delta=0,
                       patience=5, verbose=False, mode="max"),
     ]
-    logger_dir = os.path.join(REPO_ROOT_DIR, "logs/melp_finetune")
+    logger_dir = os.path.join(REPO_ROOT_DIR, "logs/polaris_finetune")
     os.makedirs(logger_dir, exist_ok=True)
-    wandb_logger = WandbLogger(
-        project="melp_finetune", save_dir=logger_dir, name=extension)
+    
+    # 使用 SwanLab 记录实验
+    logger = SwanLabLogger(
+        project="polaris_finetune",
+        experiment_name=extension,
+        save_dir=logger_dir
+    )
+    
     trainer = Trainer(
         max_epochs=hparams.max_epochs,
         accelerator="gpu",
@@ -67,7 +72,7 @@ def main(hparams: Namespace):
         strategy="ddp_find_unused_parameters_true",
         precision="bf16-mixed",
         callbacks=callbacks,
-        logger=wandb_logger
+        logger=logger
     )
 
     # ------------------------
@@ -127,8 +132,8 @@ if __name__ == '__main__':
     parser.add_argument("--model_name", type=str, default="merl",
                         choices=["merl", "cmelt", "heartlang", "melp",
                                  "ecgfm", "t5", "patchecg"])
-    parser.add_argument("--dataset_name", type=str, default="ptbxl_super_class",
-                        choices=["ptbxl_super_class", "ptbxl_sub_class", "ptbxl_form", "ptbxl_rhythm",
+    parser.add_argument("--dataset_name", type=str, default="ptbxl-super",
+                        choices=["ptbxl-super", "ptbxl-sub", "ptbxl-form", "ptbxl-rhythm",
                                  "icbeb", "chapman"])
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train_data_pct", type=float, default=1.)

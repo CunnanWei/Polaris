@@ -1,20 +1,19 @@
 import os
 from typing import List
-import ipdb
 from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 import pandas as pd
 from torch.utils.data import DataLoader
 from lightning import LightningDataModule
-from melp.datasets.pretrain_dataset import ECG_Text_Dataset
-from melp.datasets.finetune_dataset import ECGDataset
-from melp.paths import SPLIT_DIR
+from polaris.datasets.pretrain_dataset import ECG_Text_Dataset
+from polaris.datasets.finetune_dataset import ECGDataset
+from polaris.paths import DATA_ROOT_PATH
 
 
 class ECGTextDataModule(LightningDataModule):
     def __init__(self, 
                  dataset_dir: str, 
                  dataset_list: List = ["mimic-iv-ecg"],
-                 val_dataset_list: List = ["ptbxl_super_class", "ptbxl_sub_class", "ptbxl_form", "ptbxl_rhythm",
+                 val_dataset_list: List = ["ptbxl-super", "ptbxl-sub", "ptbxl-form", "ptbxl-rhythm",
                                            "icbeb", "chapman"],
                  batch_size: int = 128, 
                  num_workers: int = 4,
@@ -88,19 +87,10 @@ class ECGTextDataModule(LightningDataModule):
         else:
             val_loaders = []
             for dataset_name in self.val_dataset_list:
-                if "ptbxl" in dataset_name:
-                    task_name = dataset_name.replace('ptbxl_', '')
-                    dataset_dir = os.path.join(self.dataset_dir, "ptbxl")
-                    split_dir = SPLIT_DIR / "ptbxl" / task_name
-                else:
-                    dataset_dir = os.path.join(self.dataset_dir, f"{dataset_name}")
-                    split_dir = SPLIT_DIR / dataset_name
 
                 val_dataset = ECGDataset(
-                    data_path=dataset_dir,
-                    csv_file=pd.read_csv(split_dir / f"{dataset_name}_val.csv"),
-                    dataset_name=dataset_name,
                     split="val",
+                    dataset_name=dataset_name,
                     data_pct=1
                 )
 
@@ -142,16 +132,14 @@ class ECGTextDataModule(LightningDataModule):
 
 if __name__ == "__main__":
     dm = ECGTextDataModule(
-        dataset_dir="/disk1/*/ECG/raw",
+        dataset_dir=str(DATA_ROOT_PATH),
         dataset_list=["mimic-iv-ecg"],
         val_dataset_list=None,
         batch_size=4,
         num_workers=1,
         train_data_pct=0.1,
-        use_ecg_patch=True
     )
     
     for batch in dm.val_dataloader():
+        print('success')
         break
-
-    ipdb.set_trace()

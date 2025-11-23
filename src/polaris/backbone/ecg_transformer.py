@@ -7,18 +7,18 @@ import logging
 import torch
 import torch.nn as nn
 
-from melp.backbone.fairseq_signals.utils import utils
-from melp.backbone.fairseq_signals.models import register_model
-from melp.backbone.fairseq_signals.tasks import Task
-from melp.backbone.fairseq_signals.modules import (
+from polaris.backbone.fairseq_signals.utils import utils
+from polaris.backbone.fairseq_signals.models import register_model
+from polaris.backbone.fairseq_signals.tasks import Task
+from polaris.backbone.fairseq_signals.modules import (
     GradMultiply,
     GatherLayer,
     LayerNorm,
     ConvFeatureExtraction,
     ConvPositionalEncoding,
 )
-from melp.backbone.fairseq_signals.distributed import utils as dist_utils
-from melp.backbone.fairseq_transformer import (
+from polaris.backbone.fairseq_signals.distributed import utils as dist_utils
+from polaris.backbone.fairseq_transformer import (
     TransformerConfig,
     TransformerModel,
     TransformerFinetuningConfig,

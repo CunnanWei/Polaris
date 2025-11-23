@@ -12,10 +12,10 @@ import pandas as pd
 from tqdm import tqdm
 from typing import List, Dict
 from sklearn.metrics import roc_auc_score, precision_recall_curve, accuracy_score, f1_score
-from melp.models.merl_model import MERLModel
-from melp.models.melp_model import MELPModel
-from melp.datasets.finetune_datamodule import ECGDataModule
-from melp.paths import RAW_DATA_PATH, PROMPT_PATH, RESULTS_PATH, ECGFM_PATH
+from polaris.models.merl_model import MERLModel
+from polaris.models.melp_model import MELPModel
+from polaris.datasets.finetune_datamodule import ECGDataModule
+from polaris.paths import RAW_DATA_PATH, PROMPT_PATH, RESULTS_PATH, ECGFM_PATH
 
 random.seed(42)
 np.random.seed(42)
@@ -40,7 +40,7 @@ def load_model(model_name: str, ckpt_path: str):
             model.load_state_dict(torch.load(ckpt_path))
     elif model_name == "melp":
         if ckpt_path == "":
-            model = MELPModel()
+            raise ValueError("Zero-shot testing requires a pretrained model. Please provide --ckpt_path")
         else:
             model = MELPModel.load_from_checkpoint(ckpt_path, ecg_encoder_weight=str(ECGFM_PATH))
     else:

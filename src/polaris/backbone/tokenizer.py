@@ -5,7 +5,6 @@ import numpy as np
 from scipy.signal import butter, sosfilt
 import neurokit2 as nk
 import pandas as pd
-import ipdb
 
 
 class QRS_Tokenizer(nn.Module):
@@ -79,7 +78,6 @@ class QRS_Tokenizer(nn.Module):
     def calculate_t_indices(QRS_index, sentence_len):
         t_indices = []
         for i in range(len(QRS_index)):
-            ipdb.set_trace()
             idx = QRS_index[i] // 100 + 1
             # repeat idx for 12 leads
             idx = np.tile(idx, 12)
@@ -128,7 +126,7 @@ class QRS_Tokenizer(nn.Module):
 
 
 if __name__ == "__main__":
-    from melp.datasets.pretrain_datamodule import ECGTextDataModule
+    from polaris.datasets.pretrain_datamodule import ECGTextDataModule
     tokenizer = QRS_Tokenizer(window_size=96, sentence_len=252)
     dm = ECGTextDataModule(
         dataset_dir="/disk1/*/ECG/raw",
@@ -141,7 +139,6 @@ if __name__ == "__main__":
         x = batch["ecg"]
         report = batch["report"]    
         x, q_indices, t_indices, s_indices = tokenizer(x)
-        # ipdb.set_trace()
         break
 
     # x, q_indices, t_indices, s_indices = tokenizer(x)

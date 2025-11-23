@@ -3,7 +3,6 @@
 # https://github.com/935963004/LaBraM/blob/1151c3ee921fc4ba5787fc923517672efc426257/modeling_vqnsp.py
 # ---------------------------------------------------------
 
-import ipdb
 import torch
 from torch import nn
 import torch.nn.functional as F
