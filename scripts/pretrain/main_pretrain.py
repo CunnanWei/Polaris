@@ -104,7 +104,7 @@ def main(hparams: Namespace):
             batch_size=hparams.batch_size,  
             num_workers=hparams.num_workers,
             train_data_pct=hparams.train_data_pct,
-            use_rlm=True
+            use_rlm=False
         )
         model = MELPModel(**vars(hparams))  
     elif hparams.model_name == "ecgfm":
@@ -162,7 +162,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python main_pretrain.py --num_devices 4 --num_worke
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--ecg_encoder_name", type=str, default="ecgfm")
     parser.add_argument("--ecg_encoder_weight", type=str, default="")
-    parser.add_argument("--text_encoder_name", type=str, default="ncbi/MedCPT-Query-Encoder")
+    parser.add_argument("--text_encoder_name", type=str, default="")
     parser.add_argument("--clip_loss_weight", type=float, default=1.)
     parser.add_argument("--caption_loss_weight", type=float, default=2.0)
     parser.add_argument("--local_loss_weight", type=float, default=0.2)

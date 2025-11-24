@@ -60,8 +60,8 @@ class ECGDataset(Dataset):
 if __name__ == "__main__":
     from polaris.paths import FINETUNE_SPLIT_DIR
     dataset = ECGDataset(
-                         split="test",
-                         dataset_name='ptbxl-form',
+                         split="val",
+                         dataset_name='ptbxl-super',
                          )
     print(len(dataset))
     sample = dataset[0]

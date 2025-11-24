@@ -9,14 +9,10 @@ version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "cosine-annealing-warmup",
     "einops",
-    "fairseq-signals",
-    "fairseq-signals-backbone",
     "lightning",
     "neurokit2",
     "numpy",
-    "omegaconf",
     "pandas",
     "pyyaml",
     "scikit-learn",
@@ -27,7 +23,6 @@ dependencies = [
     "torchvision",
     "tqdm",
     "transformers",
-    "wfdb"
 ]
 
 [tool.setuptools.packages.find]
