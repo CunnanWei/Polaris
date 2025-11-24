@@ -142,7 +142,7 @@ def main(hparams: Namespace):
 
 if __name__ == '__main__':
     '''
-CUDA_VISIBLE_DEVICES=0,1,2,3 python main_pretrain.py --num_devices 4 --train_data_pct 1 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python main_pretrain.py --num_devices 4 --num_workers 12 --train_data_pct 1 \
     --text_encoder_name fuyingw/heart_bert \
     --lr 2e-4 --model_name melp --batch_size 64 --max_epochs 100 \
     --ecg_encoder_name ecgfm \
